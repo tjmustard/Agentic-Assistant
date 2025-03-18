@@ -5,6 +5,10 @@ __pycache__/
 
 *.png
 *.db 
+checkpoints.db*
+*.log
+*-report-*.txt
+.DS_Store
 
 # C extensions
 *.so

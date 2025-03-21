@@ -18,6 +18,7 @@ from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, AIM
 from pydantic import BaseModel
 
 from langchain_ollama import ChatOllama, OllamaLLM
+from langchain_community.chat_models import ChatLiteLLM
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 #Tools
@@ -114,6 +115,8 @@ local_llm: str = os.environ.get("OLLAMA_MODEL", 'llama3.1')
 #search_api: SearchAPI = SearchAPI(os.environ.get("SEARCH_API", SearchAPI.DUCKDUCKGO.value))  # Default to DUCKDUCKGO
 fetch_full_page: bool = os.environ.get("FETCH_FULL_PAGE", "False").lower() in ("true", "1", "t")
 ollama_base_url: str = os.environ.get("OLLAMA_SERVER", "http://localhost:11434/")
+llm_base_url: str = os.environ.get("LLM_SERVER")
+llm_api_key: str = os.environ.get("LLM_API_KEY")
 gemini_api_key: str = os.environ.get("GEMINI_API_KEY")
 brave_api_key: str = os.environ.get("BRAVE_AI_KEY")
 tavily_api_key: str = os.environ.get("TAVILY_API_KEY")
@@ -125,15 +128,20 @@ print(BREAKLINE)
 print("Using the Ollama server located here:")
 print(ollama_base_url)
 #model = ChatOpenAI(model=local_llm, base_url=ollama_base_url + "/v1", api_key="ollama")#, format='json')
+#model_tool = ChatLiteLLM(model="bedrock-llama3-2-3b", base_url=llm_base_url, api_key=llm_api_key)#, num_ctx=20000)#, temperature=0.4, format='json')
 #model_tool = ChatOllama(model="llama3.1", base_url=ollama_base_url)#, num_ctx=20000)#, temperature=0.4, format='json')
 #model_tool = ChatOllama(model="llama3.1", base_url=ollama_base_url, temperature=0.4, num_ctx=20000)#, format='json')
 #model_tool = ChatOllama(model="mistral", base_url=ollama_base_url, temperature=0)#, num_ctx=40000)#, format='json')
 #model_tool = ChatOllama(model="qwen2.5", base_url=ollama_base_url, temperature=0, num_ctx=40000)#, format='json')
 #model_tool = ChatOllama(model="llama3.1", base_url=ollama_base_url, temperature=0, num_ctx=40000)#, format='json')
-model_tool = ChatOllama(model="llama3.2", base_url=ollama_base_url, temperature=0, num_ctx=80000)#, format='json')
-model = ChatOllama(model="gemma3", base_url=ollama_base_url)#, temperature=0.4, num_ctx=4096)#, format='json')
+#model_tool = ChatOllama(model="llama3.2", base_url=ollama_base_url, temperature=0, num_ctx=80000)#, format='json')
+#model = ChatOllama(model="gemma3", base_url=ollama_base_url)#, temperature=0.4, num_ctx=4096)#, format='json')
 
 model_long = ChatGoogleGenerativeAI(
+                           model="gemini-2.0-flash",
+                           google_api_key=gemini_api_key,
+                          )
+model_tool = ChatGoogleGenerativeAI(
                            model="gemini-2.0-flash",
                            google_api_key=gemini_api_key,
                           )
@@ -222,46 +230,52 @@ def reflection_node(state: AgentState):
     return {"critique": response.content}
 
 def research_plan_node(state: AgentState):
-    queries = model_tool.with_structured_output(Queries).invoke([
-        SystemMessage(content=RESEARCH_PLAN_PROMPT),
-        HumanMessage(content=state['task'])
-    ])
-
     if "content" in state:
         content = state['content']
     else:
         content = []
 
-    for q in queries.queries:
-        response = brave.run(str(q))
-        sleep(1)
-        for r in ast.literal_eval(response):
-            cleaned_snippet = ''.join(c for c in r['snippet'] if c in KEYBOARD_CHARS)
-            content.append(cleaned_snippet)  # Brave
+    try:
+        queries = model_tool.with_structured_output(Queries).invoke([
+            SystemMessage(content=RESEARCH_PLAN_PROMPT),
+            HumanMessage(content=state['task'])
+        ])
+
+        for q in queries.queries:
+            response = brave.run(str(q))
+            sleep(1)
+            for r in ast.literal_eval(response):
+                cleaned_snippet = ''.join(c for c in r['snippet'] if c in KEYBOARD_CHARS)
+                content.append(cleaned_snippet)  # Brave
+    except:
+        print(BREAKLINE)
+        print("Search Failed")
+        print(BREAKLINE)
 
     return {"content": content}
 
 def research_critique_node(state: AgentState):
-    queries = model_tool.with_structured_output(Queries).invoke([
-        SystemMessage(content=RESEARCH_CRITIQUE_PROMPT), #RESEARCH_PLAN_PROMPT), #
-        HumanMessage(content=state['critique'])
-    ])
-    #print(BREAKLINE)
-    #print(RESEARCH_PLAN_PROMPT)
-    #print(state['critique'])
-    #print(BREAKLINE)
-
     if "content" in state:
         content = state['content']
     else:
         content = []
 
-    for q in queries.queries:
-        response = brave.run(str(q))
-        sleep(1)
-        for r in ast.literal_eval(response):
-            cleaned_snippet = ''.join(c for c in r['snippet'] if c in KEYBOARD_CHARS)
-            content.append(cleaned_snippet)  # Brave
+    try:
+        queries = model_tool.with_structured_output(Queries).invoke([
+            SystemMessage(content=RESEARCH_CRITIQUE_PROMPT), #RESEARCH_PLAN_PROMPT), #
+            HumanMessage(content=state['critique'])
+        ])
+
+        for q in queries.queries:
+            response = brave.run(str(q))
+            sleep(1)
+            for r in ast.literal_eval(response):
+                cleaned_snippet = ''.join(c for c in r['snippet'] if c in KEYBOARD_CHARS)
+                content.append(cleaned_snippet)  # Brave
+    except:
+        print(BREAKLINE)
+        print("Search Failed")
+        print(BREAKLINE)
 
     return {"content": content}
 
@@ -317,15 +331,15 @@ def main():
 
     graph = builder.compile(checkpointer=memory)
 
-    # Create an image of the Agent network
-    img = graph.get_graph().draw_png()
-    image = Image.open(io.BytesIO(img))
-    image.save("graph.png")
-
-    ## Create another graphic of the network
-    img2 = graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API)
-    image2 = Image.open(io.BytesIO(img2))
-    image2.save("graph-mermaid.png")
+    ## Create an image of the Agent network
+    #img = graph.get_graph().draw_png()
+    #image = Image.open(io.BytesIO(img))
+    #image.save("graph.png")
+    #
+    ### Create another graphic of the network
+    #img2 = graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API)
+    #image2 = Image.open(io.BytesIO(img2))
+    #image2.save("graph-mermaid.png")
 
     today = datetime.date.today()
     thread_id = today.strftime("%Y%m%d")

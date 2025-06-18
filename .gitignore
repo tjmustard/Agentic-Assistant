@@ -9,6 +9,8 @@ checkpoints.db*
 *.log
 *-report-*.txt
 .DS_Store
+*.json
+*.md
 
 # C extensions
 *.so

@@ -33,6 +33,107 @@ from langchain.globals import set_debug
 #set_verbose(True)
 #set_debug(True)
 
+
+PLAN = """
+{company}: Business Development Market Research Plan
+
+**Objective:** To develop a comprehensive understanding of {company} to inform business development strategies, specifically identifying potential joint venture partnership opportunities within biotech and materials (with flexibility based on findings) and assessing market entry feasibility, particularly focusing on North American and Asian markets.
+
+**Company:** {company} ( {company website}
+
+**Target Outcome:** A written report detailing key findings regarding {company}, including competitive analysis, product roadmap insights, recent initiatives, customer base analysis, and recommendations for partnership opportunities and market entry strategies.
+
+**I. Information Gathering & Research Areas:**
+
+**A. Company Overview & Strategy (Foundation):**
+
+*   **Source:** {company} website (About Us, News, Press Releases, Publications), LinkedIn, Crunchbase, Pitchbook, OpenCorporates, annual reports (if available).
+*   **Information to Gather:**
+    *   **Core Business:** Clearly define {company}' core business and value proposition. What problem are they solving? What is their mission?
+    *   **Technology & Innovation:** Deep dive into their core technology (sodium-ion batteries). Understand the underlying science, patents (search Espacenet, Google Patents), and technological advantages/disadvantages compared to existing battery technologies (Lithium-ion, etc.).
+    *   **Management Team:** Identify key executives and their backgrounds. Look for relevant experience in biotech, materials science, or battery technology.
+    *   **Financial Status:** Assess financial health. Look for funding rounds, investors, revenue figures (if public), and profitability. (Crunchbase, Pitchbook, news articles).
+    *   **Strategic Goals:** Identify stated or implied strategic goals. Are they focused on R&D, manufacturing, scaling production, or market penetration?
+    *   **Partnerships & Collaborations:** Identify any existing partnerships with other companies, research institutions, or government agencies.
+
+**B. Product & Technology Roadmap (Future Focus):**
+
+*   **Source:** {company} website (Products, Technology), patent filings, industry reports, technical publications, conference presentations, job postings.
+*   **Information to Gather:**
+    *   **Current Product Offerings:** Detail {company}' current product offerings (e.g., battery materials, specific battery products, etc.). Include specifications, performance data, and target applications.
+    *   **Product Development Pipeline:** Identify any announced or implied future product development plans. Look for hints in press releases, presentations, or job postings. Analyze recent patent applications to identify future technology directions.
+    *   **Technology Roadmap:** Understand {company}' long-term vision for their technology. Where do they see sodium-ion batteries fitting into the future energy landscape? What are the key technological hurdles they need to overcome?
+    *   **Manufacturing Capabilities:** Investigate their manufacturing capabilities. Do they have their own production facilities, or are they relying on contract manufacturers? What is their production capacity?
+
+**C. Market Analysis & Competitive Landscape (Contextual Understanding):**
+
+*   **Source:** Industry reports (e.g., BloombergNEF, Wood Mackenzie, McKinsey), market research databases (e.g., IBISWorld, MarketResearch.com), competitor websites, news articles, trade publications.
+*   **Information to Gather:**
+    *   **Target Market:** Define {company}' target market. Which industries are they focusing on (e.g., energy storage, electric vehicles, grid-scale storage)?
+    *   **Market Size & Growth:** Estimate the size of the sodium-ion battery market and its projected growth rate. Identify key market drivers and trends.
+    *   **Competitive Landscape:** Identify {company}' key competitors. This includes both direct competitors in the sodium-ion battery space and indirect competitors in the broader battery market (e.g., Lithium-ion battery manufacturers).
+    *   **Competitive Analysis:** Conduct a detailed competitive analysis, comparing {company}' products, technology, pricing, and market share with those of its competitors. Identify {company}' competitive advantages and disadvantages.
+    *   **Market Share:** Determine {company}' current market share (if available) and its potential to gain market share in the future.
+    *   **Regulatory Landscape:** Understand the regulatory environment for battery technologies in key markets (e.g., North America, Europe, Asia). Identify any relevant regulations or incentives that could impact {company}' business.
+
+**D. Customer Base & Relationships (Real-World Impact):**
+
+*   **Source:** {company} website (Case Studies, Testimonials), press releases, industry events, LinkedIn, customer reviews (if available).
+*   **Information to Gather:**
+    *   **Customer Profile:** Define {company}' ideal customer profile. What are their needs and pain points?
+    *   **Key Accounts:** Identify any key accounts or major customers that {company} is working with.
+    *   **Customer Demographics:** Analyze the demographics of {company}' customer base (e.g., industry, company size, geographic location).
+    *   **Customer Satisfaction:** Assess customer satisfaction levels. Look for testimonials, reviews, or case studies that provide insights into customer experiences.
+    *   **Sales & Marketing Strategy:** Understand {company}' sales and marketing strategy. How are they reaching their target customers?
+
+**E. Recent Press Coverage & Initiatives (Current Momentum):**
+
+*   **Source:** Google News, industry publications, {company} website (News, Press Releases), social media.
+*   **Information to Gather:**
+    *   **Key Announcements:** Identify any recent announcements regarding new products, partnerships, funding rounds, or market expansions.
+    *   **Media Sentiment:** Analyze the sentiment of media coverage. Is {company} being portrayed positively or negatively?
+    *   **Key Themes:** Identify any recurring themes in media coverage. What are the key messages that {company} is trying to convey?
+    *   **Social Media Presence:** Analyze {company}' social media presence. How are they engaging with their audience?
+
+**II. Actionable Steps for Agents:**
+
+1.  **Website Deep Dive:** Thoroughly review {company}' website, paying close attention to the sections mentioned above (About Us, News, Products, Technology, etc.).
+2.  **Database Research:** Utilize databases like Crunchbase, Pitchbook, and IBISWorld to gather financial information, funding history, and market data.
+3.  **Patent Search:** Conduct a patent search on Espacenet and Google Patents to understand {company}' technology and innovation pipeline.
+4.  **News & Media Monitoring:** Set up Google Alerts to monitor news and media coverage related to {company} and the sodium-ion battery market.
+5.  **LinkedIn Exploration:** Use LinkedIn to identify key executives and employees at {company} and to research their backgrounds and connections.
+6.  **Competitor Analysis:** Research {company}' key competitors and compare their products, technology, and market share.
+7.  **Customer Research:** Look for testimonials, case studies, or customer reviews that provide insights into customer experiences.
+8.  **Industry Report Review:** Analyze industry reports from reputable sources like BloombergNEF and Wood Mackenzie to understand the market dynamics of the sodium-ion battery market.
+
+**III. Report Structure:**
+
+The final report should be structured as follows:
+
+1.  **Executive Summary:** A brief overview of the key findings and recommendations.
+2.  **Company Overview:** A detailed description of {company}' core business, technology, and management team.
+3.  **Product & Technology Roadmap:** An analysis of {company}' current product offerings and future development plans.
+4.  **Market Analysis & Competitive Landscape:** An assessment of the sodium-ion battery market and {company}' competitive position.
+5.  **Customer Base & Relationships:** An analysis of {company}' customer profile, key accounts, and customer satisfaction levels.
+6.  **Recent Press Coverage & Initiatives:** A summary of recent news and media coverage related to {company}.
+7.  **Partnership Opportunities:** Identification of potential joint venture partnership opportunities in biotech and materials based on the research findings.  Specific rationale for each potential partnership should be provided.
+8.  **Market Entry Feasibility:** An assessment of the feasibility of entering new markets, particularly North America and Asia, including recommendations for market entry strategies.
+9.  **Conclusion:** A summary of the key findings and recommendations.
+10. **Appendix:** Supporting documents, such as financial statements, patent filings, and industry reports.
+
+**IV. Key Considerations for Partnership & Market Entry:**
+
+*   **Synergies:**  Identify potential synergies between {company} and potential partners.  Does {company}' technology complement the partner's existing capabilities?
+*   **Market Access:**  How can a partnership help {company} access new markets or customer segments?
+*   **Technical Expertise:**  Does a potential partner possess technical expertise that {company} lacks?
+*   **Financial Resources:**  Can a partnership provide {company} with access to additional financial resources?
+*   **Competitive Advantage:**  How can a partnership strengthen {company}' competitive advantage?
+*   **Regulatory Environment:**  Understand the regulatory environment in potential target markets and identify any potential barriers to entry.
+*   **Cultural Differences:**  Consider cultural differences when evaluating potential partnerships and market entry strategies.
+
+"""
+
+
 PROMPT = """'''You are a helpful ai agent. Use the following tools(Only when you should use):
 
 {tool_names}
